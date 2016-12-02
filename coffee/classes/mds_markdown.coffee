@@ -1,4 +1,5 @@
 highlightJs  = require 'highlight.js'
+pygmentsJs   = require 'pygments'
 twemoji      = require 'twemoji'
 extend       = require 'extend'
 markdownIt   = require 'markdown-it'
@@ -14,9 +15,15 @@ module.exports = class MdsMarkdown
     if lang?
       if lang == 'text' or lang == 'plain'
         return ''
+      else if lang == 'cpp'
+        res = pygmentsJs.colorizeSync(code, lang, 'html').substring(28).slice(0, -13)
+        # console.log(res)
+        return res
       else if highlightJs.getLanguage(lang)
         try
-          return highlightJs.highlight(lang, code).value
+          res = highlightJs.highlight(lang, code).value
+          # console.log(res)
+          return res
 
     highlightJs.highlightAuto(code).value
 

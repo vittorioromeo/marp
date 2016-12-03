@@ -11,19 +11,21 @@ module.exports = class MdsMarkdown
   @slideTagOpen:  (page) -> '<div class="slide_wrapper" id="' + page + '"><div class="slide"><div class="slide_bg"></div><div class="slide_inner">'
   @slideTagClose: (page) -> '</div><footer class="slide_footer"></footer><span class="slide_page" data-page="' + page + '">' + page + '</span></div></div>'
 
+  @dict: {}
   @highlighter: (code, lang) ->
     if lang?
       if lang == 'text' or lang == 'plain'
         return ''
-      else if lang == 'cpp'
-        res = pygmentsJs.colorizeSync(code, lang, 'html').substring(28).slice(0, -13)
-        # console.log(res)
-        return res
+      else if lang == 'pcpp'
+        if code of MdsMarkdown.dict
+          return MdsMarkdown.dict[code]
+        else
+          res = pygmentsJs.colorizeSync(code, "cpp", 'html').substring(28).slice(0, -13)
+          MdsMarkdown.dict[code] = res
+          return res
       else if highlightJs.getLanguage(lang)
         try
-          res = highlightJs.highlight(lang, code).value
-          # console.log(res)
-          return res
+          return highlightJs.highlight(lang, code, true).value
 
     highlightJs.highlightAuto(code).value
 

@@ -244,6 +244,10 @@ module.exports = class MdsWindow
         @browserWindow.setFullScreen(false)
         @send 'exitPresentation'
 
+    jumpSlide: (forwards) ->
+      if @menu.states.presentationMode
+        @send 'jumpSlide', forwards
+
     unfreeze: ->
       @freeze = false
       @send 'unfreezed'

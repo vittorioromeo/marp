@@ -167,22 +167,25 @@ do ->
   # View modes
   $('.viewmode-btn[data-viewmode]').click -> MdsRenderer.sendToMain('viewMode', $(this).attr('data-viewmode'))
 
-  $('.pane.preview').keydown (event) ->
-    console.log(event)
+  $('body').keydown (event) ->
     forwards = switch event.which
       when 13 # enter
         true
+      when 38 # up
+        false
       when 39 # right
         true
       when 37 # left
         false
+      when 40 # down
+        true
       when 27 # escape
         MdsRenderer.sendToMain('exitPresentation')
         null
       else
         null
     if forwards != null
-      editorStates.navigateSlide {}, {}, forwards
+      MdsRenderer.sendToMain('jumpSlide', forwards)
 
   # File D&D
   $(document)

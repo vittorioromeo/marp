@@ -167,6 +167,19 @@ do ->
   # View modes
   $('.viewmode-btn[data-viewmode]').click -> MdsRenderer.sendToMain('viewMode', $(this).attr('data-viewmode'))
 
+  $('.pane.preview').keydown (event) ->
+    forwards = switch event.which
+      when 13 # enter key
+        true
+      when 39 # right key
+        true
+      when 37 # left key
+        false
+      else
+        null
+    if forwards != null
+      editorStates.navigateSlide {}, {}, forwards
+
   # File D&D
   $(document)
     .on 'dragover',  -> false

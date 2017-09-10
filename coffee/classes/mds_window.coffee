@@ -233,6 +233,9 @@ module.exports = class MdsWindow
       @menu.states.theme = theme
       @menu.updateMenu()
 
+    startPresentation: ->
+      @browserWindow.setFullScreen(true)
+
     unfreeze: ->
       @freeze = false
       @send 'unfreezed'
@@ -249,7 +252,7 @@ module.exports = class MdsWindow
     return '(untitled)' unless @path?
     @path.replace(/\\/g, '/').replace(/.*\//, '')
 
-  getCurrentFile: => 
+  getCurrentFile: =>
     return 'untitled' unless @path?
     @path.replace(/\\/g, '/').replace(/.*\//, '').replace(/\.[^/.]+$/, "")
 

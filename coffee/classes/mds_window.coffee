@@ -58,6 +58,7 @@ module.exports = class MdsWindow
         window: bw
         development: global.marp.development
         viewMode: @viewMode
+        presentationMode: false
 
       bw.maximize() if global.marp.config.get 'windowPosition.maximized'
 
@@ -234,7 +235,14 @@ module.exports = class MdsWindow
       @menu.updateMenu()
 
     startPresentation: ->
+      @menu.states.presentationMode = true
       @browserWindow.setFullScreen(true)
+
+    exitPresentation: ->
+      if @menu.states.presentationMode
+        @menu.states.presentationMode = false
+        @browserWindow.setFullScreen(false)
+        @send 'exitPresentation'
 
     unfreeze: ->
       @freeze = false

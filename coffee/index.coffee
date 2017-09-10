@@ -168,13 +168,17 @@ do ->
   $('.viewmode-btn[data-viewmode]').click -> MdsRenderer.sendToMain('viewMode', $(this).attr('data-viewmode'))
 
   $('.pane.preview').keydown (event) ->
+    console.log(event)
     forwards = switch event.which
-      when 13 # enter key
+      when 13 # enter
         true
-      when 39 # right key
+      when 39 # right
         true
-      when 37 # left key
+      when 37 # left
         false
+      when 27 # escape
+        MdsRenderer.sendToMain('exitPresentation')
+        null
       else
         null
     if forwards != null
@@ -307,9 +311,14 @@ do ->
     .on 'resourceState', (state) -> loadingState = state
 
     .on 'startPresentation', ->
+      new Notification('Press escape key to exit presentation mode.')
       $('#md-pane').addClass('presentation')
       $('#footer').addClass('presentation')
       MdsRenderer.sendToMain 'startPresentation'
+
+    .on 'exitPresentation', ->
+      $('#md-pane').removeClass('presentation')
+      $('#footer').removeClass('presentation')
 
     .on 'jumpSlide', (forwards) -> editorStates.navigateSlide {}, {}, forwards
 

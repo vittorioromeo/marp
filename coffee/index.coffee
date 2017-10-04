@@ -38,17 +38,21 @@ class EditorStates
       { label: '&Paste', accelerator: 'CmdOrCtrl+V', role: 'paste' }
       { label: '&Delete', role: 'delete' }
       { label: 'Select &All', accelerator: 'CmdOrCtrl+A', click: (i, w) => @codeMirror.execCommand 'selectAll' if w and !w.mdsWindow.freeze }
-      { type: 'separator', platform: 'darwin' }
       { label: 'Services', role: 'services', submenu: [], platform: 'darwin' }
     ]
 
-  refreshPage: (rulers) =>
+  getCurrentPage: (rulers) =>
     @rulers = rulers if rulers?
     page    = 1
 
     lineNumber = @codeMirror.getCursor().line || 0
     for rulerLine in @rulers
       page++ if rulerLine <= lineNumber
+
+    page
+
+  refreshPage: (rulers) =>
+    page = @getCurrentPage rulers
 
     if @currentPage != page
       @currentPage = page
@@ -133,6 +137,17 @@ class EditorStates
         CodeMirror.Pos(@codeMirror.firstLine(), 0)
       )
 
+  navigateSlide: (i, w, forward) =>
+    page = @getCurrentPage()
+    return if page == 1 and not forward # can't go "previous from page 1"
+
+    idx = if forward then page - 1 else page - 3
+    idx = if idx >= @rulers.length then @rulers.length - 1 else idx # prevent overflow
+    editorLine = if idx >= 0 then @rulers[idx] else 0  # prevent underflow
+    @codeMirror.setCursor
+      line: editorLine
+      ch: 0
+
 loadingState = 'loading'
 
 do ->
@@ -151,6 +166,26 @@ do ->
 
   # View modes
   $('.viewmode-btn[data-viewmode]').click -> MdsRenderer.sendToMain('viewMode', $(this).attr('data-viewmode'))
+
+  $('body').keydown (event) ->
+    forwards = switch event.which
+      when 13 # enter
+        true
+      when 38 # up
+        false
+      when 39 # right
+        true
+      when 37 # left
+        false
+      when 40 # down
+        true
+      when 27 # escape
+        MdsRenderer.sendToMain('exitPresentation')
+        null
+      else
+        null
+    if forwards != null
+      MdsRenderer.sendToMain('jumpSlide', forwards)
 
   # File D&D
   $(document)
@@ -172,7 +207,12 @@ do ->
   draggingSplitPosition = undefined
 
   setSplitter = (splitPoint) ->
-    splitPoint = Math.min(0.8, Math.max(0.2, parseFloat(splitPoint)))
+    min_allowed = 0.2
+
+    if splitPoint < 0.01
+      min_allowed = 0.0
+
+    splitPoint = Math.min(0.8, Math.max(min_allowed, parseFloat(splitPoint)))
 
     $('.pane.markdown').css('flex-grow', splitPoint * 100)
     $('.pane.preview').css('flex-grow', (1 - splitPoint) * 100)
@@ -272,6 +312,18 @@ do ->
     .on 'setTheme', (theme) -> editorStates.updateGlobalSetting '$theme', theme
     .on 'themeChanged', (theme) -> MdsRenderer.sendToMain 'themeChanged', theme
     .on 'resourceState', (state) -> loadingState = state
+
+    .on 'startPresentation', ->
+      new Notification('Press escape key to exit presentation mode.')
+      $('#md-pane').addClass('presentation')
+      $('#footer').addClass('presentation')
+      MdsRenderer.sendToMain 'startPresentation'
+
+    .on 'exitPresentation', ->
+      $('#md-pane').removeClass('presentation')
+      $('#footer').removeClass('presentation')
+
+    .on 'jumpSlide', (forwards) -> editorStates.navigateSlide {}, {}, forwards
 
   # Initialize
   editorStates.codeMirror.focus()

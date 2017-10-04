@@ -58,6 +58,7 @@ module.exports = class MdsWindow
         window: bw
         development: global.marp.development
         viewMode: @viewMode
+        presentationMode: false
 
       bw.maximize() if global.marp.config.get 'windowPosition.maximized'
 
@@ -166,7 +167,8 @@ module.exports = class MdsWindow
 
     saveAs: (triggers = {}) ->
       dialog.showSaveDialog @browserWindow,
-        title: 'Save as...'
+        title: 'Save as...',
+        defaultPath: @getCurrentFile(),
         filters: [{ name: 'Markdown file', extensions: ['md'] }]
       , (fname) =>
         if fname?
@@ -199,6 +201,7 @@ module.exports = class MdsWindow
       return if @freeze
       dialog.showSaveDialog @browserWindow,
         title: 'Export to PDF...'
+        defaultPath: @getCurrentFile(),
         filters: [{ name: 'PDF file', extensions: ['pdf'] }]
       , (fname) =>
         return unless fname?
@@ -231,6 +234,20 @@ module.exports = class MdsWindow
       @menu.states.theme = theme
       @menu.updateMenu()
 
+    startPresentation: ->
+      @menu.states.presentationMode = true
+      @browserWindow.setFullScreen(true)
+
+    exitPresentation: ->
+      if @menu.states.presentationMode
+        @menu.states.presentationMode = false
+        @browserWindow.setFullScreen(false)
+        @send 'exitPresentation'
+
+    jumpSlide: (forwards) ->
+      if @menu.states.presentationMode
+        @send 'jumpSlide', forwards
+
     unfreeze: ->
       @freeze = false
       @send 'unfreezed'
@@ -246,6 +263,10 @@ module.exports = class MdsWindow
   getShortPath: =>
     return '(untitled)' unless @path?
     @path.replace(/\\/g, '/').replace(/.*\//, '')
+
+  getCurrentFile: =>
+    return 'untitled' unless @path?
+    @path.replace(/\\/g, '/').replace(/.*\//, '').replace(/\.[^/.]+$/, "")
 
   updateResourceState: =>
     newState = if @_watchingResources.size <= 0 then 'loaded' else 'loading'

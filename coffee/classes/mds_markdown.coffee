@@ -140,35 +140,7 @@ module.exports = class MdsMarkdown
         @renderers.html_block.apply(@, args)
         defaultRenderers.html_block.apply(@, args)
 
-  load_replacements: (markdown) =>
-    result = {}
-
-    macro_kw = "<!-- replace "
-    lines = markdown.split "\n"
-    for l in lines
-      res = l.match(macro_kw)
-      if res != null
-        macro_body = l.substr(res.index + macro_kw.length, l.length - macro_kw.length - res.index - 4)
-        macro_pieces = macro_body.split('|')
-        macro_key = macro_pieces[0]
-        macro_val = macro_pieces[1]
-        result[macro_key] = macro_val
-
-    console.log(result)
-    result
-
-  do_replacements: (replacements, markdown) =>
-    lines = markdown.split "\n"
-    for l,i in lines
-      if lines[i].includes("<!--") == false
-        for k,v of replacements
-          lines[i] = strReplaceAll(k, v, lines[i])
-
-    lines.join("\n")
-
   parse: (markdown) =>
-    replacements = @load_replacements(markdown)
-
     lines = markdown.split "\n"
 
     final_script = '(function() {\nlet result = "";\n'
@@ -208,7 +180,7 @@ module.exports = class MdsMarkdown
     @settingsPosition = []
     @lastParsed       = """
                         #{MdsMarkdown.slideTagOpen(1)}
-                        #{@markdown.render @do_replacements(replacements, markdown)}
+                        #{@markdown.render markdown}
                         #{MdsMarkdown.slideTagClose(@_rulers.length + 1)}
                         """
     ret =

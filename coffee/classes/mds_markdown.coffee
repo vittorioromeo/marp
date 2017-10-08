@@ -189,7 +189,7 @@ module.exports = class MdsMarkdown
               if l[i2] == '}' && l[i2 + 1] == '}'
                 js_value = l.substring(i + 3, i2)
                 final_script += "result += #{js_value};\n"
-                i = i2 + 2
+                i = i2 + 1
                 break
           else
             acc += l[i]

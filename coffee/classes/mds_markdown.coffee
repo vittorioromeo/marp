@@ -6,6 +6,9 @@ markdownIt   = require 'markdown-it'
 Path         = require 'path'
 MdsMdSetting = require './mds_md_setting'
 {exist}      = require './mds_file'
+escapeStringRegexp = require 'escape-string-regexp';
+strReplaceAll = require 'str-replace-all'
+jsStringEscape = require 'js-string-escape'
 
 module.exports = class MdsMarkdown
   @slideTagOpen:  (page) -> '<div class="slide_wrapper" id="' + page + '"><div class="slide"><div class="slide_bg"></div><div class="slide_inner">'
@@ -137,13 +140,75 @@ module.exports = class MdsMarkdown
         @renderers.html_block.apply(@, args)
         defaultRenderers.html_block.apply(@, args)
 
+  load_replacements: (markdown) =>
+    result = {}
+
+    macro_kw = "<!-- replace "
+    lines = markdown.split "\n"
+    for l in lines
+      res = l.match(macro_kw)
+      if res != null
+        macro_body = l.substr(res.index + macro_kw.length, l.length - macro_kw.length - res.index - 4)
+        macro_pieces = macro_body.split('|')
+        macro_key = macro_pieces[0]
+        macro_val = macro_pieces[1]
+        result[macro_key] = macro_val
+
+    console.log(result)
+    result
+
+  do_replacements: (replacements, markdown) =>
+    lines = markdown.split "\n"
+    for l,i in lines
+      if lines[i].includes("<!--") == false
+        for k,v of replacements
+          lines[i] = strReplaceAll(k, v, lines[i])
+
+    lines.join("\n")
+
   parse: (markdown) =>
+    replacements = @load_replacements(markdown)
+
+    lines = markdown.split "\n"
+
+    final_script = '(function() {\nlet result = "";\n'
+    for l in lines
+      if l[0] == '@' && l[1] == '@' && l[2] == ' '
+        final_script += "#{l.substr(3, l.length)}\n"
+      else if l[0] == '@' && l[1] == '>'
+        final_script += "result += #{l.substr(2, l.length)};\nresult += '\\n';\n"
+      else
+        acc = ''
+        i = 0
+        while i < l.length
+          if l[i] == '@' && l[i + 1] == '{' && l[i + 2] == '{'
+            final_script += "result += '#{jsStringEscape acc}';\n"
+            acc = ''
+
+            for i2 in [(i+3)...(l.length)]
+              if l[i2] == '}' && l[i2 + 1] == '}'
+                js_value = l.substring(i + 3, i2)
+                final_script += "result += #{js_value};\n"
+                i = i2 + 2
+                break
+          else
+            acc += l[i]
+
+          i += 1
+
+        final_script += "result += '#{jsStringEscape acc}\\n';\n"
+
+    final_script += 'return result;\n})();'
+    console.log(final_script)
+    console.log(eval(final_script))
+    markdown = eval(final_script)
+
     @_rulers          = []
     @_settings        = new MdsMdSetting
     @settingsPosition = []
     @lastParsed       = """
                         #{MdsMarkdown.slideTagOpen(1)}
-                        #{@markdown.render markdown}
+                        #{@markdown.render @do_replacements(replacements, markdown)}
                         #{MdsMarkdown.slideTagClose(@_rulers.length + 1)}
                         """
     ret =

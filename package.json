@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "codemirror": "^5.11.0",
+    "escape-string-regexp": "^1.0.5",
     "extend": "^3.0.0",
     "github-markdown-css": "^2.4.1",
     "highlight.js": "^9.1.0",
@@ -50,6 +51,8 @@
     "markdown-it-katex": "^2.0.1",
     "markdown-it-mark": "^2.0.0",
     "path": "^0.12.7",
+    "js-string-escape": "^1.0.1",
+    "str-replace-all": "^0.3.0",
     "photon": "github:connors/photon",
     "pygments": "^0.2.1",
     "twemoji": "^2.5.0"

@@ -173,6 +173,7 @@ module.exports = class MdsMainMenu
             }
             {
               label: '&Start Presentation'
+              accelerator: 'F12'
               click: =>
                 @window.mdsWindow.send 'startPresentation'
             }

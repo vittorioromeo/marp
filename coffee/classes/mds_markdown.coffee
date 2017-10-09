@@ -143,24 +143,25 @@ module.exports = class MdsMarkdown
   parse: (markdown) =>
     lines = markdown.split "\n"
 
-    final_script = '(function() {\nlet result = "";\n'
+    final_script  = "const include = require('require-reload')(require);"
+    final_script += '(function() {\nlet out = "";\n'
     for l in lines
       if l[0] == '@' && l[1] == '@' && l[2] == ' '
         final_script += "#{l.substr(3, l.length)}\n"
       else if l[0] == '@' && l[1] == '>'
-        final_script += "result += #{l.substr(2, l.length)};\nresult += '\\n';\n"
+        final_script += "out += #{l.substr(2, l.length)};\nout += '\\n';\n"
       else
         acc = ''
         i = 0
         while i < l.length
           if l[i] == '@' && l[i + 1] == '{' && l[i + 2] == '{'
-            final_script += "result += '#{jsStringEscape acc}';\n"
+            final_script += "out += '#{jsStringEscape acc}';\n"
             acc = ''
 
             for i2 in [(i+3)...(l.length)]
               if l[i2] == '}' && l[i2 + 1] == '}'
                 js_value = l.substring(i + 3, i2)
-                final_script += "result += #{js_value};\n"
+                final_script += "out += #{js_value};\n"
                 i = i2 + 1
                 break
           else
@@ -168,9 +169,9 @@ module.exports = class MdsMarkdown
 
           i += 1
 
-        final_script += "result += '#{jsStringEscape acc}\\n';\n"
+        final_script += "out += '#{jsStringEscape acc}\\n';\n"
 
-    final_script += 'return result;\n})();'
+    final_script += 'return out;\n})();'
     console.log(final_script)
     console.log(eval(final_script))
     markdown = eval(final_script)

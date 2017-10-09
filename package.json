@@ -55,6 +55,7 @@
     "str-replace-all": "^0.3.0",
     "photon": "github:connors/photon",
     "pygments": "^0.2.1",
-    "twemoji": "^2.5.0"
+    "twemoji": "^2.5.0",
+    "require-reload": "^0.2.2"
   }
 }

@@ -129,8 +129,10 @@ module.exports = class MdsMarkdown
         twemoji.parse(token[idx].content, @twemojiOpts)
 
       hr: (token, idx) =>
-        ruler.push token[idx].map[0] if ruler = @_rulers
-        "#{MdsMarkdown.slideTagClose(ruler.length || '')}#{MdsMarkdown.slideTagOpen(if ruler then ruler.length + 1 else '')}"
+        if @mustfindrulers == true
+          @_rulers.push token[idx].map[0]
+        else
+          "#{MdsMarkdown.slideTagClose(@_rulers.length || '')}#{MdsMarkdown.slideTagOpen(if @_rulers then @_rulers.length + 1 else '')}"
 
       image: (args...) =>
         @renderers.image.apply(@, args)
@@ -141,25 +143,28 @@ module.exports = class MdsMarkdown
         defaultRenderers.html_block.apply(@, args)
 
   parse: (markdown) =>
+    @_rulers = []
+    @mustfindrulers = true
+    @markdown.render markdown
+    @mustfindrulers = false
+
     lines = markdown.split "\n"
 
     final_script  = "const include = require('require-reload')(require);"
     final_script += '(function() {\nlet out = "";\n'
     for l in lines
-      if l[0] == '@' && l[1] == '@' && l[2] == ' '
+      if l.startsWith('@@ ')
         final_script += "#{l.substr(3, l.length)}\n"
-      else if l[0] == '@' && l[1] == '>'
-        final_script += "out += #{l.substr(2, l.length)};\nout += '\\n';\n"
       else
         acc = ''
         i = 0
         while i < l.length
-          if l[i] == '@' && l[i + 1] == '{' && l[i + 2] == '{'
+          if l.startsWith('@{{', i)
             final_script += "out += '#{jsStringEscape acc}';\n"
             acc = ''
 
             for i2 in [(i+3)...(l.length)]
-              if l[i2] == '}' && l[i2 + 1] == '}'
+              if l.startsWith('}}', i2)
                 js_value = l.substring(i + 3, i2)
                 final_script += "out += #{js_value};\n"
                 i = i2 + 1
@@ -172,11 +177,11 @@ module.exports = class MdsMarkdown
         final_script += "out += '#{jsStringEscape acc}\\n';\n"
 
     final_script += 'return out;\n})();'
-    console.log(final_script)
-    console.log(eval(final_script))
+    # console.log(final_script)
+    # console.log(eval(final_script))
     markdown = eval(final_script)
 
-    @_rulers          = []
+
     @_settings        = new MdsMdSetting
     @settingsPosition = []
     @lastParsed       = """

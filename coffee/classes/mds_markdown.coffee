@@ -152,33 +152,69 @@ module.exports = class MdsMarkdown
 
     final_script  = "const include = require('require-reload')(require);"
     final_script += '(function() {\nlet out = "";\n'
-    for l in lines
-      if l.startsWith('@@ ')
-        final_script += "#{l.substr(3, l.length)}\n"
+
+    line = ''
+    i = 0
+    while i < markdown.length
+      if markdown[i] == '\n'
+        if line.startsWith('@@ ')
+          final_script += "#{line.substr(3, line.length)}\n"
+        else
+          final_script += "out += '#{jsStringEscape line}\\n';\n"
+        line = ''
+      else if markdown.startsWith('@{{', i)
+        for j in [(i)...(markdown.length)]
+          if markdown.startsWith('}}', j)
+            js_value = markdown.substring(i + 3, j)
+            console.log("js_value: #{js_value}")
+            final_script += "out += #{js_value};\n"
+            i = j + 1
+            break
+      else if markdown.startsWith('@[[', i)
+        for j in [(i)...(markdown.length)]
+          if markdown.startsWith(']]', j)
+            js_value = markdown.substring(i + 3, j)
+            js_value = js_value.replace(/\n/g, "\\n");
+            console.log("js_value: #{js_value}")
+            final_script += "out += #{js_value};\n"
+            i = j + 1
+            break
       else
-        acc = ''
-        i = 0
-        while i < l.length
-          if l.startsWith('@{{', i)
-            final_script += "out += '#{jsStringEscape acc}';\n"
-            acc = ''
+        line += markdown[i]
 
-            for i2 in [(i+3)...(l.length)]
-              if l.startsWith('}}', i2)
-                js_value = l.substring(i + 3, i2)
-                final_script += "out += #{js_value};\n"
-                i = i2 + 1
-                break
-          else
-            acc += l[i]
+      i += 1
 
-          i += 1
+    final_script += "out += '#{jsStringEscape line}\\n';\n"
+    line = ''
 
-        final_script += "out += '#{jsStringEscape acc}\\n';\n"
+
+    #for l in lines
+    #  if l.startsWith('@@ ')
+    #    final_script += "#{l.substr(3, l.length)}\n"
+    #  else
+    #    acc = ''
+    #    i = 0
+    #    while i < l.length
+    #      if l.startsWith('@{{', i)
+    #        final_script += "out += '#{jsStringEscape acc}';\n"
+    #        acc = ''
+#
+    #        for i2 in [(i+3)...(l.length)]
+    #          if l.startsWith('}}', i2)
+    #            js_value = l.substring(i + 3, i2)
+    #            final_script += "out += #{js_value};\n"
+    #            i = i2 + 1
+    #            break
+    #      else
+    #        acc += l[i]
+#
+    #      i += 1
+#
+    #    final_script += "out += '#{jsStringEscape acc}\\n';\n"
 
     final_script += 'return out;\n})();'
-    # console.log(final_script)
-    # console.log(eval(final_script))
+    console.log(final_script)
+    console.log(eval(final_script))
     markdown = eval(final_script)
 
 

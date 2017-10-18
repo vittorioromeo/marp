@@ -23,6 +23,7 @@ module.exports = class MdsWindow
     icon:   Path.join(__dirname, '/../../images/marp.png')
 
   browserWindow: null
+  noteWindow: null
   path: null
   changed: false
   freeze: false
@@ -107,6 +108,39 @@ module.exports = class MdsWindow
       bw.on 'resize', updateWindowPosition
       bw.on 'maximize', updateWindowPosition
       bw.on 'unmaximize', updateWindowPosition
+
+      bw.mdsWindow = @
+      bw
+
+    @noteWindow = do =>
+      bw = new BrowserWindow({ width: 800, height: 400 })
+      # @_note_window_id = bw.id
+
+      loadCmp = (details) =>
+        setTimeout =>
+          @_watchingResources.delete(details.id)
+          @updateResourceState()
+        , 500
+
+      bw.webContents.session.webRequest.onCompleted loadCmp
+      bw.webContents.session.webRequest.onErrorOccurred loadCmp
+      bw.webContents.session.webRequest.onBeforeRequest (details, callback) =>
+        @_watchingResources.add(details.id)
+        @updateResourceState()
+        callback({})
+
+      bw.loadURL "file://#{__dirname}/../../note.html##{@_window_id}"
+
+      bw.webContents.on 'did-finish-load', =>
+        @_noteWindowLoaded = true
+
+      bw.webContents.on 'changed-slide', =>
+        @sendNote 'test', 100
+
+      bw.once 'ready-to-show', => bw.show()
+
+      bw.on 'closed', =>
+        @noteWindow = null
 
       bw.mdsWindow = @
       bw
@@ -252,6 +286,9 @@ module.exports = class MdsWindow
       @freeze = false
       @send 'unfreezed'
 
+    slideChangedTo: (n) ->
+      @noteWindow.webContents.send 'test', n
+
   refreshTitle: =>
     if process.platform == 'darwin'
       @browserWindow?.setTitle "#{@getShortPath()}#{if @changed then ' *' else ''}"
@@ -290,3 +327,6 @@ module.exports = class MdsWindow
   send: (evt, args...) =>
     return false unless @_windowLoaded and @browserWindow?
     @browserWindow.webContents.send 'MdsManagerSendEvent', evt, { from: null, to: @_window_id }, args
+
+  sendNote: (evt, args...) =>
+    @noteWindow.webContents.send 'MdsManagerSendEvent', evt, { from: null, to: @_window_id }, args

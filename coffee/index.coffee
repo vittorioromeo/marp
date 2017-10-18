@@ -51,11 +51,41 @@ class EditorStates
 
     page
 
+  updateNotes: =>
+    txt = @codeMirror.getValue().split('\n')
+    p = @currentPage - 1
+    rlrs = @rulers.slice()
+    rlrs.unshift(0)
+    rlrs.push(txt.length)
+
+    l0 = rlrs[p]
+    if l0 != 0
+      l0 += 1
+    l1 = rlrs[p + 1]
+
+    console.log "rlrs=#{rlrs}"
+    console.log "p=#{p}"
+    console.log "l0=#{l0}"
+    console.log "l1=#{l1}"
+    console.log "----"
+
+    notemarker = "<!--# "
+    acc = ''
+    for i in [l0...l1]
+      if txt[i].startsWith(notemarker) && txt[i].endsWith("-->")
+        acc += txt[i].substring(notemarker.length, txt[i].length - 3)
+        acc += '\n'
+
+    MdsRenderer.sendToMain('slideChangedTo', acc)
+
   refreshPage: (rulers) =>
     page = @getCurrentPage rulers
 
     if @currentPage != page
       @currentPage = page
+
+      @updateNotes()
+
       @preview.send 'currentPage', @currentPage if @previewInitialized
 
     $('#page-indicator').text "Page #{@currentPage} / #{@rulers.length + 1}"
@@ -91,6 +121,9 @@ class EditorStates
 
       .on 'did-finish-load', (e) =>
         @preview.send 'currentPage', 1
+
+        @updateNotes()
+
         @preview.send 'setImageDirectory', @_imageDirectory
         @preview.send 'render', @codeMirror.getValue()
 
@@ -106,6 +139,7 @@ class EditorStates
 
     @codeMirror.on 'change', (cm, chg) =>
       @preview.send 'render', cm.getValue()
+      @updateNotes()
       MdsRenderer.sendToMain 'setChangedStatus', true if !@_lockChangedStatus
 
     @codeMirror.on 'cursorActivity', (cm) => window.setTimeout (=> @refreshPage()), 5
@@ -139,6 +173,12 @@ class EditorStates
 
   navigateSlide: (i, w, forward) =>
     page = @getCurrentPage()
+
+    @updateNotes()
+
+    # Restart animations in presentation mode
+    @preview.send 'render', @codeMirror.getValue()
+
     return if page == 1 and not forward # can't go "previous from page 1"
 
     idx = if forward then page - 1 else page - 3

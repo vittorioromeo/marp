@@ -34,6 +34,41 @@ module.exports = class MdsWindow
 
   viewMode: null
 
+  openNoteWindow: =>
+    console.log("opening")
+    if @noteWindow != null
+      return
+    console.log("opening 2")
+
+    bw = new BrowserWindow({ width: 800, height: 400 })
+
+    loadCmp = (details) =>
+      setTimeout =>
+        @_watchingResources.delete(details.id)
+        @updateResourceState()
+      , 500
+
+    bw.webContents.session.webRequest.onCompleted loadCmp
+    bw.webContents.session.webRequest.onErrorOccurred loadCmp
+    bw.webContents.session.webRequest.onBeforeRequest (details, callback) =>
+      @_watchingResources.add(details.id)
+      @updateResourceState()
+      callback({})
+
+    bw.loadURL "file://#{__dirname}/../../note.html##{@_window_id}"
+
+    bw.webContents.on 'did-finish-load', =>
+      @_noteWindowLoaded = true
+
+    bw.once 'ready-to-show', => bw.show()
+
+    bw.on 'closed', =>
+      @noteWindow = null
+
+    bw.mdsWindow = @
+    @noteWindow = bw
+    bw
+
   constructor: (fileOpts = {}, @options = {}) ->
     @path = fileOpts?.path || null
     @viewMode = global.marp.config.get('viewMode')
@@ -97,6 +132,7 @@ module.exports = class MdsWindow
                 MdsWindow.appWillQuit = false
 
       bw.on 'closed', =>
+        @noteWindow?.close()
         @browserWindow = null
         @_setIsOpen false
 
@@ -112,39 +148,7 @@ module.exports = class MdsWindow
       bw.mdsWindow = @
       bw
 
-    @noteWindow = do =>
-      bw = new BrowserWindow({ width: 800, height: 400 })
-      # @_note_window_id = bw.id
-
-      loadCmp = (details) =>
-        setTimeout =>
-          @_watchingResources.delete(details.id)
-          @updateResourceState()
-        , 500
-
-      bw.webContents.session.webRequest.onCompleted loadCmp
-      bw.webContents.session.webRequest.onErrorOccurred loadCmp
-      bw.webContents.session.webRequest.onBeforeRequest (details, callback) =>
-        @_watchingResources.add(details.id)
-        @updateResourceState()
-        callback({})
-
-      bw.loadURL "file://#{__dirname}/../../note.html##{@_window_id}"
-
-      bw.webContents.on 'did-finish-load', =>
-        @_noteWindowLoaded = true
-
-      bw.webContents.on 'changed-slide', =>
-        @sendNote 'test', 100
-
-      bw.once 'ready-to-show', => bw.show()
-
-      bw.on 'closed', =>
-        @noteWindow = null
-
-      bw.mdsWindow = @
-      bw
-
+    @openNoteWindow()
     @_setIsOpen true
 
   @loadFromFile: (fname, mdsWindow, options = {}) ->
@@ -287,7 +291,7 @@ module.exports = class MdsWindow
       @send 'unfreezed'
 
     slideChangedTo: (n) ->
-      @noteWindow.webContents.send 'test', n
+      @noteWindow?.webContents.send 'test', n
 
   refreshTitle: =>
     if process.platform == 'darwin'
@@ -327,6 +331,3 @@ module.exports = class MdsWindow
   send: (evt, args...) =>
     return false unless @_windowLoaded and @browserWindow?
     @browserWindow.webContents.send 'MdsManagerSendEvent', evt, { from: null, to: @_window_id }, args
-
-  sendNote: (evt, args...) =>
-    @noteWindow.webContents.send 'MdsManagerSendEvent', evt, { from: null, to: @_window_id }, args

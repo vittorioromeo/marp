@@ -177,6 +177,11 @@ module.exports = class MdsMainMenu
               click: =>
                 @window.mdsWindow.send 'startPresentation'
             }
+            {
+              label: '&Open notes'
+              click: =>
+                @window.mdsWindow.openNoteWindow()
+            }
           ]
         }
         {

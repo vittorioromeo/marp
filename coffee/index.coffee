@@ -354,7 +354,7 @@ do ->
     .on 'resourceState', (state) -> loadingState = state
 
     .on 'startPresentation', ->
-      new Notification('Press escape key to exit presentation mode.')
+      # new Notification('Press escape key to exit presentation mode.')
       $('#md-pane').addClass('presentation')
       $('#footer').addClass('presentation')
       MdsRenderer.sendToMain 'startPresentation'

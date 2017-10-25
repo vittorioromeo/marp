@@ -13,6 +13,20 @@ document.addEventListener 'DOMContentLoaded', ->
       for target in $(@).attr('data-marp-path-resolver').split(/\s+/)
         $(@).attr(target, resolvePathFromMarp($(@).attr(target)))
 
+    $('p').each ->
+      $this = $(this)
+      $this.html $this.text().replace(/\b(\w+)\b/g, '<span>$1</span>')
+      return
+    # bind to each span
+    $('p span').hover (->
+      $('#word').text $(this).css('background-color', '#ffff66').text()
+      return
+    ), ->
+      $('#word').text ''
+      $(this).css 'background-color', ''
+      return
+    return
+
     Markdown = new clsMarkdown({ afterRender: clsMarkdown.generateAfterRender($) })
 
     $('body').keydown (event) ->

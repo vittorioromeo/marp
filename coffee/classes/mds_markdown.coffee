@@ -126,31 +126,36 @@ module.exports = class MdsMarkdown
 
     extend rules,
       emoji: (token, idx) =>
-        twemoji.parse(token[idx].content, @twemojiOpts)
+        if @mustfindrulers == false
+          twemoji.parse(token[idx].content, @twemojiOpts)
 
       hr: (token, idx) =>
         if @mustfindrulers == true
           @_rulers.push token[idx].map[0]
         else
-          "#{MdsMarkdown.slideTagClose(@_rulers.length || '')}#{MdsMarkdown.slideTagOpen(if @_rulers then @_rulers.length + 1 else '')}"
+          ++@lastruler
+          "#{MdsMarkdown.slideTagClose(@lastruler)}#{MdsMarkdown.slideTagOpen(@lastruler + 1)}"
 
       image: (args...) =>
-        @renderers.image.apply(@, args)
-        defaultRenderers.image.apply(@, args)
+        if @mustfindrulers == false
+          @renderers.image.apply(@, args)
+          defaultRenderers.image.apply(@, args)
 
       html_block: (args...) =>
-        @renderers.html_block.apply(@, args)
-        defaultRenderers.html_block.apply(@, args)
+        if @mustfindrulers == false
+          @renderers.html_block.apply(@, args)
+          defaultRenderers.html_block.apply(@, args)
 
   parse: (markdown) =>
     @_rulers = []
 
-    console.log @_rulers
+    # console.log @_rulers
 
     # Rendering step to find slide separators
     @mustfindrulers = true
     @markdown.render markdown
     @mustfindrulers = false
+    @lastruler = 0
 
     final_script  = "const include = require('require-reload')(require);"
     final_script += '(function() {\nlet out = "";\n'
@@ -231,7 +236,7 @@ module.exports = class MdsMarkdown
 
           if parsed
             startFrom += parsed[1].length
-            pageIdx = @_rulers.length || 0
+            pageIdx = @lastruler
 
             if parsed[3] is '$'
               @_settings.setGlobal parsed[4], parsed[5]

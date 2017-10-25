@@ -35,10 +35,10 @@ module.exports = class MdsWindow
   viewMode: null
 
   openNoteWindow: =>
-    console.log("opening")
+    # console.log("opening")
     if @noteWindow != null
       return
-    console.log("opening 2")
+    # console.log("opening 2")
 
     bw = new BrowserWindow({ width: 800, height: 400 })
 

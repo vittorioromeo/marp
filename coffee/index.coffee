@@ -63,11 +63,11 @@ class EditorStates
       l0 += 1
     l1 = rlrs[p + 1]
 
-    console.log "rlrs=#{rlrs}"
-    console.log "p=#{p}"
-    console.log "l0=#{l0}"
-    console.log "l1=#{l1}"
-    console.log "----"
+    # console.log "rlrs=#{rlrs}"
+    # console.log "p=#{p}"
+    # console.log "l0=#{l0}"
+    # console.log "l1=#{l1}"
+    # console.log "----"
 
     notemarker = "<!--# "
     acc = ''
@@ -222,6 +222,17 @@ do ->
       when 27 # escape
         MdsRenderer.sendToMain('exitPresentation')
         null
+      else
+        null
+    if forwards != null
+      MdsRenderer.sendToMain('jumpSlide', forwards)
+
+  $('body').mousedown (event) ->
+    forwards = switch event.which
+      when 1 # left
+        true
+      when 3 # right
+        false
       else
         null
     if forwards != null

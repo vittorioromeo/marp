@@ -15,6 +15,11 @@ document.addEventListener 'DOMContentLoaded', ->
 
     Markdown = new clsMarkdown({ afterRender: clsMarkdown.generateAfterRender($) })
 
+    $('body').keydown (event) ->
+      forwards = switch event.which
+        when 81 # q
+          $('body').toggleClass("laserpointer")
+
     themes = {}
     themes.current = -> $('#theme-css').attr('href')
     themes.default = themes.current()

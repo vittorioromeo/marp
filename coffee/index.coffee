@@ -53,9 +53,12 @@ class EditorStates
 
   updateNotes: =>
     txt = @codeMirror.getValue().split('\n')
+<<<<<<< HEAD
     if txt == null
       return
 
+=======
+>>>>>>> 7aa6c6b39914f156ee0127471e4932aef95acb9c
     p = @currentPage - 1
     rlrs = @rulers.slice()
     rlrs.unshift(0)
@@ -66,7 +69,16 @@ class EditorStates
       l0 += 1
     l1 = rlrs[p + 1]
 
+<<<<<<< HEAD
     # TODO: work with newlines
+=======
+    # console.log "rlrs=#{rlrs}"
+    # console.log "p=#{p}"
+    # console.log "l0=#{l0}"
+    # console.log "l1=#{l1}"
+    # console.log "----"
+
+>>>>>>> 7aa6c6b39914f156ee0127471e4932aef95acb9c
     notemarker = "<!--# "
     acc = ''
     for i in [l0...l1]

@@ -13,26 +13,18 @@ document.addEventListener 'DOMContentLoaded', ->
       for target in $(@).attr('data-marp-path-resolver').split(/\s+/)
         $(@).attr(target, resolvePathFromMarp($(@).attr(target)))
 
-    $('p').each ->
-      $this = $(this)
-      $this.html $this.text().replace(/\b(\w+)\b/g, '<span>$1</span>')
-      return
-    # bind to each span
-    $('p span').hover (->
-      $('#word').text $(this).css('background-color', '#ffff66').text()
-      return
-    ), ->
-      $('#word').text ''
-      $(this).css 'background-color', ''
-      return
-    return
-
     Markdown = new clsMarkdown({ afterRender: clsMarkdown.generateAfterRender($) })
 
     $('body').keydown (event) ->
       forwards = switch event.which
         when 81 # q
           $('body').toggleClass("laserpointer")
+        when 87 # w
+          $('#highlighter').toggle()
+        when 69 # e
+          $('#highlighter').height('+=5')
+        when 82 # r
+          $('#highlighter').height('-=5')
 
     themes = {}
     themes.current = -> $('#theme-css').attr('href')
@@ -105,6 +97,31 @@ document.addEventListener 'DOMContentLoaded', ->
       md.changedTheme = themes.apply md.settings.getGlobal('theme')
 
       $('#markdown').html(md.parsed)
+
+    # TODO: revisit
+      # Hover words:
+    #  $('code').contents().filter(->
+    #    return @nodeType == 3
+    #  ).each(->
+    #    $this = $(this)
+    #
+    #    $this.replaceWith("<span>#{$this.text()}</span>")
+    #    #console.log("text: #{$this.text()}")
+    #    # $this.html("<span>#{$this.text()}</span>")#.replace(/\b(\w+)\b/g, '<span>$1</span>'))
+    #    #console.log($this.html())
+    #  )
+    #
+    #  $('code span').hover (->
+    #    $('#word').text $(this).css('background-color', '#ffff66').text()
+    #  ), ->
+    #    $('#word').text ''
+    #    $(this).css 'background-color', ''
+
+      document.onmousemove = (e) ->
+        event = e or window.event
+        x = event.clientX
+        y = event.clientY
+        $('#highlighter').css({top: Math.floor(y / 8) * 8, left: 0})
 
       ipc.sendToHost 'rendered', md
       ipc.sendToHost 'rulerChanged', md.rulers if md.rulerChanged

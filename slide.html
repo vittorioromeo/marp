@@ -73,6 +73,17 @@
     .vi { color: #bb60d5 } /* Name.Variable.Instance */
     .il { color: #40a070 } /* Literal.Number.Integer.Long */
     </style>
+    <style type="text/css">
+      #highlighter {
+        background-color:yellow;
+        opacity: 0.4;
+        position:fixed;
+        width:100%;
+        height:24px;
+        z-index: 999;
+        display: none;
+      }
+  </style>
 
     <link rel="stylesheet" id="theme-css" href="css/themes/default.css" data-marp-path-resolver="href" />
 
@@ -80,6 +91,7 @@
   </head>
   <body class="slide-view screen">
     <div id="container">
+      <div id="highlighter"></div>
       <div id="markdown" class="markdown-body"></div>
     </div>
     <div id="to-pdf-wrapper">

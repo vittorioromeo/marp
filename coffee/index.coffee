@@ -53,40 +53,40 @@ class EditorStates
 
   updateNotes: =>
     txt = @codeMirror.getValue().split('\n')
-<<<<<<< HEAD
     if txt == null
       return
 
-=======
->>>>>>> 7aa6c6b39914f156ee0127471e4932aef95acb9c
     p = @currentPage - 1
+
+    # get all rules, add 0 at beginning and some marker at the end
     rlrs = @rulers.slice()
     rlrs.unshift(0)
     rlrs.push(txt.length)
 
+    # do some magic index adjustment that I wrote 3 weeks ago and can't remember why
     l0 = rlrs[p]
     if l0 != 0
       l0 += 1
     l1 = rlrs[p + 1]
 
-<<<<<<< HEAD
-    # TODO: work with newlines
-=======
-    # console.log "rlrs=#{rlrs}"
-    # console.log "p=#{p}"
-    # console.log "l0=#{l0}"
-    # console.log "l1=#{l1}"
-    # console.log "----"
+    noteopen = "<!--# "
+    noteclose = "-->"
 
->>>>>>> 7aa6c6b39914f156ee0127471e4932aef95acb9c
-    notemarker = "<!--# "
+    # concat md source of current page
     acc = ''
     for i in [l0...l1]
-      if txt[i].startsWith(notemarker) && txt[i].endsWith("-->")
-        acc += txt[i].substring(notemarker.length, txt[i].length - 3)
-        acc += '\n'
+      acc += txt[i]
+      acc += '\n'
 
-    MdsRenderer.sendToMain('slideChangedTo', acc)
+    # find note and render
+    note = acc.match(new RegExp(noteopen + '([\\s\\S]*)' + noteclose))
+
+    if note == null
+      noteresult = ''
+    else
+      noteresult = note[1]
+
+    MdsRenderer.sendToMain('slideChangedTo', noteresult)
 
   refreshPage: (rulers) =>
     page = @getCurrentPage rulers

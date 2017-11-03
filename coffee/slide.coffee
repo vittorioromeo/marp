@@ -22,9 +22,9 @@ document.addEventListener 'DOMContentLoaded', ->
         when 87 # w
           $('#highlighter').toggle()
         when 69 # e
-          $('#highlighter').height('+=5')
+          $('#highlighter').height('+=' + if event.shiftKey then '10' else '5')
         when 82 # r
-          $('#highlighter').height('-=5')
+          $('#highlighter').height('-=' + if event.shiftKey then '10' else '5')
 
     themes = {}
     themes.current = -> $('#theme-css').attr('href')

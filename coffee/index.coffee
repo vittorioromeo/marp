@@ -240,9 +240,15 @@ do ->
   $('body').mousedown (event) ->
     forwards = switch event.which
       when 1 # left
-        true
+        if not event.ctrlKey
+          true
+        else
+          null
       when 3 # right
-        false
+        if not event.ctrlKeyy
+          false
+        else
+          null
       else
         null
     if forwards != null

@@ -8,6 +8,7 @@ runSequence = require('run-sequence')
 Path        = require('path')
 extend      = require('extend')
 mkdirp      = require('mkdirp')
+$.uglify    = require('gulp-uglify-es').default;
 
 packageOpts =
   asar: true

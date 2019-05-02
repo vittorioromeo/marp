@@ -14,13 +14,14 @@ module.exports = class MdsWindow
   @appWillQuit: false
 
   @defOptions: () ->
-    title:  'Marp'
-    show:   false
-    x:      global.marp.config.get 'windowPosition.x'
-    y:      global.marp.config.get 'windowPosition.y'
-    width:  global.marp.config.get 'windowPosition.width'
-    height: global.marp.config.get 'windowPosition.height'
-    icon:   Path.join(__dirname, '/../../images/marp.png')
+    title:     'Marp'
+    show:      false
+    x:         global.marp.config.get 'windowPosition.x'
+    y:         global.marp.config.get 'windowPosition.y'
+    width:     global.marp.config.get 'windowPosition.width'
+    height:    global.marp.config.get 'windowPosition.height'
+    icon:      Path.join(__dirname, '/../../images/marp.png')
+    allowEval: true
 
   browserWindow: null
   noteWindow: null
@@ -40,7 +41,7 @@ module.exports = class MdsWindow
       return
     # console.log("opening 2")
 
-    bw = new BrowserWindow({ width: 800, height: 400 })
+    bw = new BrowserWindow({ width: 800, height: 400, allowEval: true })
 
     loadCmp = (details) =>
       setTimeout =>

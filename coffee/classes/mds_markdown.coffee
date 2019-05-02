@@ -60,6 +60,9 @@ module.exports = class MdsMarkdown
     (md) ->
       mdElm = $("<div>#{md.parsed}</div>")
 
+      # Sanitize link tag
+      mdElm.find('link:not([rel="stylesheet"])').remove()
+
       mdElm.find('p > img[alt~="bg"]').each ->
         $t  = $(@)
         p   = $t.parent()

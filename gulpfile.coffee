@@ -14,19 +14,19 @@ packageOpts =
   asar: true
   dir: 'dist'
   out: 'packages'
-  name: config.name
+  name: config.productName
   version: config.devDependencies['electron']
-  prune: true
+  prune: false
   overwrite: true
   'app-bundle-id': 'jp.yhatt.marp'
   'app-version': config.version
   'version-string':
-    ProductName: config.name
-    InternalName: config.name
-    FileDescription: config.name
+    ProductName: config.productName
+    InternalName: config.productName
+    FileDescription: config.productName
     CompanyName: 'yhatt'
     LegalCopyright: ''
-    OriginalFilename: "#{config.name}.exe"
+    OriginalFilename: "#{config.productName}.exe"
 
 packageElectron = (opts = {}, done) ->
   packager extend(packageOpts, opts), (err) ->
@@ -109,32 +109,35 @@ gulp.task 'dist', ['clean:dist'], ->
     'package.json'
     'example.md'
     'LICENSE'
+    'yarn.lock'
   ], { base: '.' })
     .pipe gulp.dest('dist')
     .pipe $.install
-      production: true
+      commands:
+        'package.json': 'yarn'
+      yarn: ['--production', '--ignore-optional', '--no-bin-links']
 
 gulp.task 'package', ['clean:packages', 'dist'], (done) ->
   runSequence 'package:win32', 'package:darwin', 'package:linux', done
 
-gulp.task 'package:win32', (done) ->
+gulp.task 'package:win32', ->
   packageElectron {
     platform: 'win32'
     arch: 'ia32,x64'
     icon: Path.join(__dirname, 'resources/windows/marp.ico')
-  }, done
-gulp.task 'package:linux', (done) ->
+  }
+gulp.task 'package:linux', ->
   packageElectron {
     platform: 'linux'
     arch: 'ia32,x64'
-  }, done
-gulp.task 'package:darwin', (done) ->
+  }
+gulp.task 'package:darwin', ->
   packageElectron {
     platform: 'darwin'
     arch: 'x64'
     icon: Path.join(__dirname, 'resources/darwin/marp.icns')
   }, ->
-    gulp.src ["packages/*-darwin-*/#{config.name}.app/Contents/Info.plist"], { base: '.' }
+    gulp.src ["packages/*-darwin-*/#{config.productName}.app/Contents/Info.plist"], { base: '.' }
       .pipe $.plist
         CFBundleDocumentTypes: [
           {
@@ -146,7 +149,6 @@ gulp.task 'package:darwin', (done) ->
           }
         ]
       .pipe gulp.dest('.')
-      .on 'end', done
 
 gulp.task 'build',        (done) -> runSequence 'compile:production', 'package', done
 gulp.task 'build:win32',  (done) -> runSequence 'compile:production', 'dist', 'package:win32', done
@@ -170,8 +172,7 @@ gulp.task 'archive:darwin', (done) ->
     null
 
   unless appdmg
-    $.util.log 'Archiving for darwin is supported only OSX.'
-    $.util.log 'In OSX, please install appdmg (`npm install appdmg`)'
+    $.util.log 'Archiving for darwin is supported only macOS.'
     return done()
 
   globFolders 'packages/*-darwin-*', (path, globDone) ->
@@ -184,7 +185,7 @@ gulp.task 'archive:darwin', (done) ->
             target: release_to
             basepath: Path.join(__dirname, path)
             specification:
-              title: config.name
+              title: config.productName
               background: Path.join(__dirname, "resources/darwin/dmg-background.png")
               'icon-size': 80
               window: {
@@ -192,7 +193,7 @@ gulp.task 'archive:darwin', (done) ->
                 size: { width: 624, height: 412 }
               }
               contents: [
-                { x: 210, y: 300, type: 'file', path: "#{config.name}.app" }
+                { x: 210, y: 300, type: 'file', path: "#{config.productName}.app" }
                 { x: 410, y: 300, type: 'link', path: '/Applications' }
               ]
           }

@@ -1,7 +1,9 @@
 {
-  "name": "Marp",
-  "version": "0.0.11",
+  "name": "marp",
+  "version": "0.0.14",
+  "private": true,
   "description": "Markdown Presentation Writer (Powered by Electron)",
+  "productName": "Marp",
   "repository": {
     "type": "git",
     "url": "https://github.com/yhatt/marp"
@@ -11,16 +13,14 @@
     "start": "gulp compile && electron . --development",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "Yuki Hattori",
   "license": "MIT",
   "devDependencies": {
     "coffee-script": "^1.12.7",
     "del": "^3.0.0",
-    "electron": "1.8.4",
-    "electron-packager": "12.0.1",
+    "electron-packager": "12.2.0",
+    "electron": "1.8.8",
     "glob": "^7.1.3",
-    "gulp": "^3.9.0",
     "gulp-coffee": "^3.0.3",
     "gulp-cssnano": "^2.1.3",
     "gulp-gzip": "^1.4.2",
@@ -34,6 +34,7 @@
     "gulp-uglify-es": "^1.0.4",
     "gulp-util": "^3.0.7",
     "gulp-zip": "^4.2.0",
+    "gulp": "^3.9.0",
     "mkdirp": "^0.5.1",
     "run-sequence": "^2.2.1"
   },
@@ -48,16 +49,19 @@
     "js-string-escape": "^1.0.1",
     "jschardet": "^1.6.0",
     "katex": "^0.9.0-alpha1",
-    "markdown-it": "^8.4.2",
     "markdown-it-emoji": "^1.4.0",
     "markdown-it-katex": "^2.0.3",
     "markdown-it-mark": "^2.0.0",
+    "markdown-it": "^8.4.2",
     "natives": "^1.1.6",
     "path": "^0.12.7",
     "photon": "github:connors/photon",
     "pygments": "^0.2.1",
     "require-reload": "^0.2.2",
     "str-replace-all": "^0.3.0",
-    "twemoji": "^2.5.0"
+    "twemoji": "^11.2.0"
+  },
+  "optionalDependencies": {
+    "appdmg": "^0.5.2"
   }
 }

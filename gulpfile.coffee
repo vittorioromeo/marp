@@ -51,15 +51,14 @@ globFolders = (pattern, func, callback) ->
     else
       callback()
 
-gulp.task 'clean', ['clean:js', 'clean:css', 'clean:dist', 'clean:packages']
 gulp.task 'clean:js', -> del ['js/**/*', 'js']
 gulp.task 'clean:css', -> del ['css/**/*', 'css']
 gulp.task 'clean:dist', -> del ['dist/**/*', 'dist']
 gulp.task 'clean:packages', -> del ['packages/**/*', 'packages']
 gulp.task 'clean:releases', -> del ['releases/**/*', 'releases']
+gulp.task 'clean', (gulp.series 'clean:js', 'clean:css', 'clean:dist', 'clean:packages')
 
-gulp.task 'compile', ['compile:coffee', 'compile:sass']
-gulp.task 'compile:production', ['compile:coffee:production', 'compile:sass:production']
+
 
 gulp.task 'compile:coffee', ->
   gulp.src 'coffee/**/*.coffee'
@@ -81,14 +80,14 @@ gulp.task 'compile:sass', ->
   gulp.src ['resources/katex/fonts/*']
     .pipe gulp.dest('css/fonts')
 
-gulp.task 'compile:coffee:production', ['clean:js'], ->
+gulp.task 'compile:coffee:production', gulp.series 'clean:js', ->
   gulp.src 'coffee/**/*.coffee'
     .pipe $.coffee
       bare: true
     .pipe $.uglify()
     .pipe gulp.dest('js')
 
-gulp.task 'compile:sass:production', ['clean:css'], ->
+gulp.task 'compile:sass:production', gulp.series 'clean:css', ->
   gulp.src ['sass/**/*.scss', 'sass/**/*.sass']
     .pipe $.sass()
     .pipe $.cssnano
@@ -97,7 +96,10 @@ gulp.task 'compile:sass:production', ['clean:css'], ->
   gulp.src ['resources/katex/fonts/*']
     .pipe gulp.dest('css/fonts')
 
-gulp.task 'dist', ['clean:dist'], ->
+gulp.task 'compile', (gulp.series 'compile:coffee', 'compile:sass')
+gulp.task 'compile:production', (gulp.series 'compile:coffee:production', 'compile:sass:production')
+
+gulp.task 'dist', gulp.series 'clean:dist', ->
   gulp.src([
     'js/**/*'
     'css/**/*'
@@ -117,7 +119,7 @@ gulp.task 'dist', ['clean:dist'], ->
         'package.json': 'yarn'
       yarn: ['--production', '--ignore-optional', '--no-bin-links']
 
-gulp.task 'package', ['clean:packages', 'dist'], (done) ->
+gulp.task 'package', (gulp.series 'clean:packages', 'dist'), (done) ->
   runSequence 'package:win32', 'package:darwin', 'package:linux', done
 
 gulp.task 'package:win32', ->
@@ -155,7 +157,6 @@ gulp.task 'build:win32',  (done) -> runSequence 'compile:production', 'dist', 'p
 gulp.task 'build:linux',  (done) -> runSequence 'compile:production', 'dist', 'package:linux', done
 gulp.task 'build:darwin', (done) -> runSequence 'compile:production', 'dist', 'package:darwin', done
 
-gulp.task 'archive', ['archive:win32', 'archive:darwin', 'archive:linux']
 
 gulp.task 'archive:win32', (done) ->
   globFolders 'packages/*-win32-*', (path, globDone) ->
@@ -208,5 +209,8 @@ gulp.task 'archive:linux', (done) ->
       .pipe gulp.dest('releases')
       .on 'end', globDone
   , done
+
+
+gulp.task 'archive', (gulp.series 'archive:win32', 'archive:darwin', 'archive:linux')
 
 gulp.task 'release', (done) -> runSequence 'build', 'archive', 'clean', done

@@ -297,6 +297,13 @@ module.exports = class MdsMainMenu
               checked: @states.theme == 'packt'
               click: => @window.mdsWindow.send 'setTheme', 'packt' unless @window.mdsWindow.freeze
             }
+            {
+              label: '&Oreilly'
+              enabled: @window?
+              type: if @window? then 'radio' else 'normal'
+              checked: @states.theme == 'oreilly'
+              click: => @window.mdsWindow.send 'setTheme', 'oreilly' unless @window.mdsWindow.freeze
+            }
           ]
 
           encodings: do =>

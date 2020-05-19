@@ -86,6 +86,8 @@ class EditorStates
     else
       noteresult = note[1]
 
+    MdsRenderer.sendToMain('previewSlideChangedTo', @codeMirror.getValue())
+    MdsRenderer.sendToMain('previewSlideChangePage', p + 2)
     MdsRenderer.sendToMain('slideChangedTo', noteresult)
 
   refreshPage: (rulers) =>

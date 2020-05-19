@@ -182,6 +182,11 @@ module.exports = class MdsMainMenu
               click: =>
                 @window.mdsWindow.openNoteWindow()
             }
+            {
+              label: '&Open preview'
+              click: =>
+                @window.mdsWindow.openPreviewWindow()
+            }
           ]
         }
         {

@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="connect-src http: https:; child-src http: https:; script-src 'self' app: 'unsafe-eval' http: https: 'unsafe-inline';" />
 
-    <title>Marp presentation</title>
-    <script>window.jQuery = window.$ = require('jquery');</script>
+    <title>Slide Preview</title>
 
     <link rel="stylesheet" href="css/slide.css" data-marp-path-resolver="href" />
     <style>
@@ -95,8 +94,7 @@
       <div id="highlighter"></div>
       <div id="markdown" class="markdown-body"></div>
     </div>
-    <div id="to-pdf-wrapper">
-      <img src="images/throbbers/white.svg" data-marp-path-resolver="src" />
-    </div>
   </body>
+
+  <script src="js/preview.js"></script>
 </html>

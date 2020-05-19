@@ -25,6 +25,7 @@ module.exports = class MdsWindow
 
   browserWindow: null
   noteWindow: null
+  previewWindow: null
   path: null
   changed: false
   freeze: false
@@ -68,6 +69,42 @@ module.exports = class MdsWindow
 
     bw.mdsWindow = @
     @noteWindow = bw
+    bw
+
+
+  openPreviewWindow: =>
+    # console.log("opening")
+    if @previewWindow != null
+      return
+    # console.log("opening 2")
+
+    bw = new BrowserWindow({ width: 800, height: 600, allowEval: true })
+
+    loadCmp = (details) =>
+      setTimeout =>
+        @_watchingResources.delete(details.id)
+        @updateResourceState()
+      , 500
+
+    bw.webContents.session.webRequest.onCompleted loadCmp
+    bw.webContents.session.webRequest.onErrorOccurred loadCmp
+    bw.webContents.session.webRequest.onBeforeRequest (details, callback) =>
+      @_watchingResources.add(details.id)
+      @updateResourceState()
+      callback({})
+
+    bw.loadURL "file://#{__dirname}/../../preview.html##{@_window_id}"
+
+    bw.webContents.on 'did-finish-load', =>
+      @_previewWindowLoaded = true
+
+    bw.once 'ready-to-show', => bw.show()
+
+    bw.on 'closed', =>
+      @previewWindow = null
+
+    bw.mdsWindow = @
+    @previewWindow = bw
     bw
 
   constructor: (fileOpts = {}, @options = {}) ->
@@ -134,6 +171,7 @@ module.exports = class MdsWindow
 
       bw.on 'closed', =>
         @noteWindow?.close()
+        @previewWindow?.close()
         @browserWindow = null
         @_setIsOpen false
 
@@ -149,7 +187,8 @@ module.exports = class MdsWindow
       bw.mdsWindow = @
       bw
 
-    @openNoteWindow()
+    # @openNoteWindow()
+    # @openPreviewWindow()
     @_setIsOpen true
 
   @loadFromFile: (fname, mdsWindow, options = {}) ->
@@ -293,6 +332,12 @@ module.exports = class MdsWindow
 
     slideChangedTo: (n) ->
       @noteWindow?.webContents.send 'test', n
+
+    previewSlideChangedTo: (n) ->
+      @previewWindow?.webContents.send 'test', n
+
+    previewSlideChangePage: (n) ->
+      @previewWindow?.webContents.send 'changepage', n
 
   refreshTitle: =>
     if process.platform == 'darwin'

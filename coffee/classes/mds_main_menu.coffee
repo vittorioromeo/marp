@@ -309,6 +309,13 @@ module.exports = class MdsMainMenu
               checked: @states.theme == 'oreilly'
               click: => @window.mdsWindow.send 'setTheme', 'oreilly' unless @window.mdsWindow.freeze
             }
+            {
+              label: '&BBG'
+              enabled: @window?
+              type: if @window? then 'radio' else 'normal'
+              checked: @states.theme == 'bbg'
+              click: => @window.mdsWindow.send 'setTheme', 'bbg' unless @window.mdsWindow.freeze
+            }
           ]
 
           encodings: do =>

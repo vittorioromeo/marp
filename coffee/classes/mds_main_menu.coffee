@@ -310,6 +310,13 @@ module.exports = class MdsMainMenu
               click: => @window.mdsWindow.send 'setTheme', 'oreilly' unless @window.mdsWindow.freeze
             }
             {
+              label: '&ndctechtown'
+              enabled: @window?
+              type: if @window? then 'radio' else 'normal'
+              checked: @states.theme == 'ndctechtown'
+              click: => @window.mdsWindow.send 'setTheme', 'ndctechtown' unless @window.mdsWindow.freeze
+            }
+            {
               label: '&BBG'
               enabled: @window?
               type: if @window? then 'radio' else 'normal'

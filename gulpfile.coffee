@@ -58,7 +58,7 @@ gulp.task 'clean:packages', -> del ['packages/**/*', 'packages']
 gulp.task 'clean:releases', -> del ['releases/**/*', 'releases']
 gulp.task 'clean', (gulp.series 'clean:js', 'clean:css', 'clean:dist', 'clean:packages')
 
-
+sass = require('gulp-sass')(require('sass'))
 
 gulp.task 'compile:coffee', ->
   gulp.src 'coffee/**/*.coffee'
@@ -74,7 +74,7 @@ gulp.task 'compile:sass', ->
   gulp.src ['sass/**/*.scss', 'sass/**/*.sass']
     .pipe $.plumber()
     .pipe $.sourcemaps.init()
-    .pipe $.sass()
+    .pipe sass()
     .pipe $.sourcemaps.write()
     .pipe gulp.dest('css')
   gulp.src ['resources/katex/fonts/*']
@@ -89,7 +89,7 @@ gulp.task 'compile:coffee:production', gulp.series 'clean:js', ->
 
 gulp.task 'compile:sass:production', gulp.series 'clean:css', ->
   gulp.src ['sass/**/*.scss', 'sass/**/*.sass']
-    .pipe $.sass()
+    .pipe sass()
     .pipe $.cssnano
       zindex: false
     .pipe gulp.dest('css')

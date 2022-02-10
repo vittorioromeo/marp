@@ -42,7 +42,10 @@ module.exports = class MdsWindow
       return
     # console.log("opening 2")
 
-    bw = new BrowserWindow({ width: 800, height: 400, allowEval: true })
+    bw = new BrowserWindow({ width: 800, height: 400, allowEval: true, webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        } })
 
     loadCmp = (details) =>
       setTimeout =>
@@ -78,7 +81,10 @@ module.exports = class MdsWindow
       return
     # console.log("opening 2")
 
-    bw = new BrowserWindow({ width: 800, height: 600, allowEval: true })
+    bw = new BrowserWindow({ width: 800, height: 600, allowEval: true, webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        } })
 
     loadCmp = (details) =>
       setTimeout =>
@@ -111,8 +117,17 @@ module.exports = class MdsWindow
     @path = fileOpts?.path || null
     @viewMode = global.marp.config.get('viewMode')
 
+    tap = (o, fn) -> fn(o); o
+
+    merge = (xs...) ->
+      if xs?.length > 0
+        tap {}, (m) -> m[k] = v for k, v of x for x in xs
+
     @browserWindow = do =>
-      bw = new BrowserWindow extend(true, {}, MdsWindow.defOptions(), @options)
+      bw = new BrowserWindow extend(true, {}, MdsWindow.defOptions(), merge(@options, { webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }}) )
       @_window_id = bw.id
 
       loadCmp = (details) =>

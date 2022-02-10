@@ -6,7 +6,6 @@ markdownIt   = require 'markdown-it'
 Path         = require 'path'
 MdsMdSetting = require './mds_md_setting'
 {exist}      = require './mds_file'
-escapeStringRegexp = require 'escape-string-regexp';
 strReplaceAll = require 'str-replace-all'
 jsStringEscape = require 'js-string-escape'
 
